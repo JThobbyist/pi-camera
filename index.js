@@ -60,7 +60,55 @@ class PiCamera {
     let data = Buffer.from(image, 'binary').toString('base64');
     return 'data:image/jpg;base64,' + data;
   }
+  
+  async snapBuffer(maxBuffer = 1024*1024*10) {
 
+    if (this.mode !== 'photo') {
+      throw new Error(`snapDataUrl() can only be called when Pi-Camera is in 'photo' mode`);
+    }
+
+    this.config.output = '-';
+    const image = await Execute.run(Execute.cmd('raspistill', this.configToArray()), {encoding: 'binary', maxBuffer: maxBuffer});
+    let data = Buffer.from(image, 'binary');
+    return data;
+  }
+  
+//take a picture in YUV format
+  snapYUV() {
+    if (this.mode !== 'photo') {
+      throw new Error(`snap() can only be called when Pi-Camera is in 'photo' mode`);
+    }
+    
+    return Execute.run(Execute.cmd('raspiyuv', this.configToArray()));
+  }
+
+  // Take a YUV picture and return it in Data URL format (data:image/jpg;base64,...)
+  async snapYUVDataUrl(maxBuffer = 1024*1024*10) {
+
+    if (this.mode !== 'photo') {
+      throw new Error(`snapDataUrl() can only be called when Pi-Camera is in 'photo' mode`);
+    }
+
+    this.config.output = '-';
+    const image = await Execute.run(Execute.cmd('raspiyuv', this.configToArray()), {encoding: 'binary', maxBuffer: maxBuffer});
+    let data = Buffer.from(image, 'binary').toString('base64');
+    return 'data:image/jpg;base64,' + data;
+  }
+
+    // Take a YUV picture and return it in Buffer format
+  async snapYUVBuffer(maxBuffer = 1024*1024*10) {
+
+    if (this.mode !== 'photo') {
+      throw new Error(`snapDataUrl() can only be called when Pi-Camera is in 'photo' mode`);
+    }
+
+    this.config.output = '-';
+    const image = await Execute.run(Execute.cmd('raspiyuv', this.configToArray()), {encoding: 'binary', maxBuffer: maxBuffer});
+    let data = Buffer.from(image, 'binary');
+    return data;
+  }
+  
+  
   // Record a video
   record() {
     if (this.mode !== 'video') {
